@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bot Rakan Belajar: Sistem Peredaran Darah</title>
+<style>
+  :root { 
+    --bg: #fdf5f5; 
+    --panel: #ffffff; 
+    --text: #2c1a1a; 
+    --muted: #7a5c5c; 
+    --accent: #d32f2f; 
+    --accent-hover: #b71c1c;
+    --border: #f0d8d8;
+    --bot-bg: #ffebee;
+    --user-bg: #d32f2f;
+    --user-text: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  body { 
+    margin: 0; 
+    min-height: 100vh; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    color: var(--text); 
+    background: radial-gradient(circle at 10% 20%, #ffebee 0, transparent 40%), 
+                radial-gradient(circle at 90% 80%, #ffcdd2 0, transparent 40%), 
+                var(--bg); 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    padding: 20px; 
+  }
+  .app { 
+    width: min(900px, 100%); 
+    height: min(780px, calc(100vh - 40px)); 
+    min-height: 600px; 
+    display: flex; 
+    flex-direction: column; 
+    border: 1px solid var(--border); 
+    border-radius: 24px; 
+    overflow: hidden; 
+    background: var(--panel); 
+    box-shadow: 0 20px 60px rgba(211, 47, 47, 0.15); 
+  }
+  header { 
+    padding: 20px 24px; 
+    background: linear-gradient(135deg, #d32f2f, #9a0007); 
+    color: white;
+    display: flex; 
+    gap: 16px; 
+    align-items: center; 
+  }
+  .logo { 
+    width: 56px; 
+    height: 56px; 
+    flex: none; 
+    border-radius: 20px; 
+    display: grid; 
+    place-items: center; 
+    font-size: 32px; 
+    background: rgba(255,255,255,0.2); 
+    border: 2px solid rgba(255,255,255,0.3); 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+  h1 { margin: 0 0 4px; font-size: clamp(18px, 3vw, 24px); }
+  header p { margin: 0; color: #ffcdd2; font-size: 14px; line-height: 1.4; }
+  
+  .quick { 
+    display: flex; 
+    gap: 10px; 
+    flex-wrap: wrap; 
+    padding: 14px 20px; 
+    border-bottom: 1px solid var(--border); 
+    background: #fafafa; 
+  }
+  .quick button { 
+    border: 1px solid #ffcdd2; 
+    color: var(--accent); 
+    background: white; 
+    border-radius: 999px; 
+    padding: 8px 14px; 
+    cursor: pointer; 
+    font-size: 13px; 
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .quick button:hover { 
+    background: var(--accent); 
+    color: white;
+    border-color: var(--accent);
+  }
+  
+  #chat { 
+    flex: 1; 
+    overflow-y: auto; 
+    padding: 24px; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 18px; 
+    scroll-behavior: smooth; 
+  }
+  .row { display: flex; gap: 12px; align-items: flex-end; max-width: 85%; }
+  .row.user { align-self: flex-end; flex-direction: row-reverse; }
+  
+  .avatar { 
+    width: 36px; 
+    height: 36px; 
+    border-radius: 50%; 
+    flex: none; 
+    display: grid; 
+    place-items: center; 
+    background: var(--bot-bg); 
+    border: 1px solid #ffcdd2;
+    font-size: 18px;
+  }
+  .user .avatar { background: #eeeeee; border-color: #dddddd; }
+  
+  .bubble { 
+    padding: 14px 18px; 
+    background: var(--bot-bg); 
+    border-radius: 20px 20px 20px 4px; 
+    line-height: 1.5; 
+    font-size: 15px; 
+    overflow-wrap: anywhere; 
+    color: var(--text);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+  }
+  .user .bubble { 
+    background: var(--user-bg); 
+    color: var(--user-text); 
+    border-radius: 20px 20px 4px 20px; 
+  }
+  
+  .composer { 
+    padding: 18px; 
+    display: flex; 
+    gap: 12px; 
+    background: #ffffff; 
+    border-top: 1px solid var(--border); 
+  }
+  #message { 
+    min-width: 0; 
+    flex: 1; 
+    border: 2px solid var(--border); 
+    border-radius: 999px; 
+    padding: 12px 20px; 
+    font-size: 15px; 
+    color: var(--text); 
+    background: #fafafa; 
+    outline: none; 
+    transition: border-color 0.2s;
+  }
+  #message:focus { border-color: var(--accent); }
+  #send { 
+    border: 0; 
+    border-radius: 999px; 
+    padding: 0 24px; 
+    color: white; 
+    background: var(--accent); 
+    font-weight: bold; 
+    cursor: pointer; 
+    transition: background 0.2s;
+  }
+  #send:hover { background: var(--accent-hover); }
+  
+  @media(max-width: 600px) { 
+    body { padding: 0; } 
+    .app { height: 100vh; min-height: 0; border-radius: 0; } 
+    header { padding: 16px; } 
+    .logo { width: 48px; height: 48px; font-size: 24px; }
+    #chat { padding: 16px; } 
+    .row { max-width: 92%; } 
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">🫀</div>
+    <div>
+      <h1>Bot Rakan Belajar</h1>
+      <p>Sistem Peredaran Darah Manusia</p>
+    </div>
+  </header>
+  
+  <nav class="quick" aria-label="Soalan pantas">
+    <button data-q="Apakah fungsi jantung?">Fungsi jantung?</button>
+    <button data-q="Apakah komponen darah?">Komponen darah</button>
+    <button data-q="Berikan jenis salur darah">Jenis salur darah?</button>
+    <button data-q="Bagaimana cara menjaga kesihatan jantung?">Cara jaga jantung?</button>
+  </nav>
+  
+  <main id="chat" aria-live="polite">
+    <div class="row bot">
+      <div class="avatar">🤖</div>
+      <div class="bubble">Hai! Saya <strong>Bot Rakan Belajar</strong>. 🩸<br><br>Mari kita belajar tentang Sistem Peredaran Darah Manusia. Awak boleh tanya saya tentang jantung, jenis darah, atau salur darah!</div>
+    </div>
+  </main>
+  
+  <form class="composer" id="form">
+    <input id="message" type="text" placeholder="Taip soalan awak di sini..." autocomplete="off" aria-label="Taip soalan anda" required>
+    <button id="send" type="submit">Hantar ➤</button>
+  </form>
+</div>
+
+<script>
+const chat = document.getElementById('chat');
+const form = document.getElementById('form');
+const input = document.getElementById('message');
+
+// Pangkalan pengetahuan Bot berasaskan kata kunci / regex
+const knowledgeBase = [
+  { 
+    keywords: /(fungsi|tujuan).*(sistem peredaran|darah)/i, 
+    answer: "Sistem peredaran darah berfungsi mengangkut oksigen, nutrien dan bahan penting yang lain ke seluruh badan, serta membawa bahan buangan untuk disingkirkan." 
+  },
+  { 
+    keywords: /(organ|pam darah|jantung|kedudukan jantung)/i, 
+    answer: "Jantung ialah organ berotot yang mengepam darah ke seluruh bahagian badan. Ia terletak di dalam rongga dada, sedikit ke sebelah kiri dari bahagian tengah." 
+  },
+  { 
+    keywords: /(komponen darah|darah terdiri)/i, 
+    answer: "Darah kita terdiri daripada empat komponen utama: <strong>Plasma, Sel darah merah, Sel darah putih</strong> dan <strong>Platlet</strong>." 
+  },
+  { 
+    keywords: /(ruang jantung|atrium|ventrikel)/i, 
+    answer: "Jantung manusia mempunyai empat ruang: dua ruang di atas yang menerima darah dipanggil <strong>Atrium</strong>, dan dua ruang di bawah yang mengepam darah keluar dipanggil <strong>Ventrikel</strong>." 
+  },
+  { 
+    keywords: /(salur darah|arteri|vena|kapilari)/i, 
+    answer: "Terdapat tiga jenis utama salur darah:<br>1. <strong>Arteri:</strong> Membawa darah keluar dari jantung.<br>2. <strong>Vena:</strong> Membawa darah kembali ke jantung.<br>3. <strong>Kapilari:</strong> Salur yang paling kecil, tempat pertukaran bahan antara darah dengan sel badan." 
+  },
+  { 
+    keywords: /(sel darah merah|merah|hemoglobin)/i, 
+    answer: "<strong>Sel darah merah</strong> berfungsi mengangkut oksigen. Ia menggunakan protein yang dipanggil hemoglobin, yang juga memberikan warna merah kepada darah kita." 
+  },
+  { 
+    keywords: /(sel darah putih|putih|kuman|jangkitan)/i, 
+    answer: "<strong>Sel darah putih</strong> adalah pahlawan badan kita! Ia berfungsi membantu melindungi badan daripada jangkitan dan melawan kuman." 
+  },
+  { 
+    keywords: /(platlet|pembekuan|beku|luka)/i, 
+    answer: "<strong>Platlet</strong> ialah cebisan kecil sel yang sangat penting. Ia membantu proses pembekuan darah apabila salur darah kita tercedera (luka) supaya pendarahan berhenti." 
+  },
+  { 
+    keywords: /(plasma)/i, 
+    answer: "<strong>Plasma</strong> ialah bahagian cecair dalam darah yang berwarna kuning pucat. Ia membawa sel darah, nutrien, hormon dan bahan buangan." 
+  },
+  { 
+    keywords: /(kesihatan jantung|jaga jantung|jaga kesihatan|senam|makanan|merokok)/i, 
+    answer: "Untuk menjaga kesihatan sistem peredaran darah: Bersenam secara berkala, makan makanan seimbang, tidur secukupnya dan elakkan tabiat buruk seperti merokok." 
+  },
+  { 
+    keywords: /(oksigen.*paru-paru|paru-paru)/i, 
+    answer: "Darah mengalir ke paru-paru untuk membebaskan karbon dioksida dan menyerap oksigen yang baru, sebelum dipam semula ke seluruh badan oleh jantung." 
+  },
+  { 
+    keywords: /(hai|hello|helo|salam|selamat)/i, 
+    answer: "Hai! 👋 Bersedia untuk belajar Sains hari ini? Cuba tanya saya tentang jantung atau darah!" 
+  },
+  { 
+    keywords: /(terima kasih|tq|thanks|bagus)/i, 
+    answer: "Sama-sama! 🫀 Teruskan sifat ingin tahu awak. Belajar sains itu sangat menyeronokkan!" 
+  }
+];
+
+function addMessage(text, who) {
+  const row = document.createElement('div');
+  row.className = 'row ' + who;
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar';
+  avatar.textContent = who === 'user' ? '🧑‍🎓' : '🤖';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.innerHTML = text;
+  row.append(avatar, bubble);
+  chat.appendChild(row);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function getAnswer(question) {
+  const q = question.toLowerCase();
+  
+  // Padanan regex dengan pangkalan pengetahuan
+  for (const item of knowledgeBase) {
+    if (item.keywords.test(q)) {
+      return item.answer;
+    }
+  }
+  
+  // Mesej lalai (Fallback) jika tidak faham
+  return 'Maaf, saya tak pasti jawapan untuk itu. Bolehkah awak cuba tanya tentang <strong>fungsi jantung</strong>, <strong>komponen darah</strong> (seperti sel darah merah/putih), atau <strong>salur darah</strong>?';
+}
+
+form.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const value = input.value.trim();
+  if (!value) return;
+  addMessage(escapeHtml(value), 'user');
+  input.value = '';
+  // Simulasi masa berfikir (sedikit kelengahan)
+  setTimeout(() => addMessage(getAnswer(value), 'bot'), 400);
+});
+
+// Sambungkan butang soalan pantas
+document.querySelectorAll('.quick button').forEach(button => {
+  button.addEventListener('click', () => {
+    const value = button.dataset.q;
+    addMessage(escapeHtml(value), 'user');
+    setTimeout(() => addMessage(getAnswer(value), 'bot'), 400);
+  });
+});
+
+// Elakkan isu suntikan HTML dari input pengguna
+function escapeHtml(text) {
+  return text.replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+</script>
+</body>
+</html>
